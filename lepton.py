@@ -1,3 +1,6 @@
+# TODO: Finish building the models
+#       Figure out how to distribute the datasets (potentially using .pop or making some sort of stack)
+
 import csv
 import pandas as pd
 import numpy as np
@@ -5,7 +8,10 @@ import itertools
 import math
 import random
 
+from tqdm import tqdm
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
+
 # "DATA PREPROCESSING"
 # # Open instances (X_data)
 # split_data = []
@@ -68,9 +74,6 @@ dataset_size = len(formatted_X_data)
 input_size = len(formatted_X_data.columns)
 
 """CHOICE FUNCTIONS"""
-# TODO: if clause of splitter function needs to be divided into test and train sets,
-#       Build different modules for each machine learning model
-#       Figure out a way of putting generated datasets through x number of different models,
 
 possible_algorithms = ["ANN", "RF", "KNN", "SVM", "GPC", "GNB", "BNB"]
 
@@ -80,8 +83,6 @@ Y_dataset = [int(y) for y in formatted_Y_data.values]
 
 assert len(X_dataset) == len(Y_dataset)
 
-datasets = [X_dataset, Y_dataset]
-
 train_split = .7
 test_split = .3
 
@@ -89,46 +90,54 @@ X_data_len = len(X_dataset)
 Y_data_len = len(Y_dataset)
 
 # Data splitter, receives number of algorithms and the dataset as inputs, and outputs the appropriate number of datasets
+def shuffler(inputs, targets):
+    combined = list(zip(inputs, targets))
+    shuffled = shuffle(combined)
+    X, Y = zip(*shuffled)
+
+    return X, Y
+
+X_data, Y_data = shuffler(X_dataset, Y_dataset)
+
+datasets = [X_data, Y_data]
+
 def splitter(datasets):
     processed_datasets = []
 
+    def user_choices():
+        algorithms = []
+
+        choices = input("Input the algorithms you would like to use. You have the following choices: ANN, RF, KNN, SVM, GPC, GNB, BNB \n",)
+
+        models = choices.split(", ")
+
+        for model in tqdm(models):
+            model = model.upper()
+            if model in possible_algorithms:
+                algorithms.append(model)
+
+        return algorithms
+
+    len_of_algorithms = len(user_choices())
+
     for dataset in datasets:
-        def user_choices():
-            algorithms = []
-
-            choices = input("Input the algorithms you would like to use. You have the following choices: ANN, RF, KNN, SVM, GPC, GNB, BNB \n",)
-
-            models = choices.split(", ")
-
-            for model in models:
-                model = model.upper()
-                if model in possible_algorithms:
-                    algorithms.append(model)
-
-            return algorithms
-
-        len_of_algorithms = len(user_choices())
-
         if len_of_algorithms == 1:
-            dataset = train_test_split(dataset, test_size=test_split, train_size=.7, shuffle=True)
+            processed_datasets = train_test_split(dataset, test_size=test_split, train_size=.7, shuffle=False)
 
-            return dataset
+            return processed_datasets
         else:
             split = math.floor(dataset_size / len_of_algorithms) # Rounded down
             split_data = [dataset[x:x+split] for x in range(0, len(dataset), split)]
             split_data.pop()[-1]
 
-            for unique_dataset in split_data:
-                divided_dataset = train_test_split(unique_dataset, test_size=test_split, train_size=.7, shuffle=True)
-                processed_datasets.append(divided_dataset)
+        for unique_dataset in split_data:
+            divided_dataset = train_test_split(unique_dataset, test_size=test_split, train_size=.7, shuffle=False)
+            processed_datasets.append(divided_dataset)
 
-                return processed_datasets
+    return processed_datasets
 
 processed_datasets = splitter(datasets)
-for thing in processed_datasets:
-    print(len(thing))
-    for ting in thing:
-        print(len(ting))
+
 # for thing in processed_datasets:
 #     print(len(thing))
 #     for ting in thing:
