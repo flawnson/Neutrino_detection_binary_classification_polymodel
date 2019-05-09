@@ -138,10 +138,33 @@ def splitter(datasets):
 
 processed_datasets = splitter(datasets)
 
-# for thing in processed_datasets:
-#     print(len(thing))
-#     for ting in thing:
-#         print(len(ting))
+def seperator(processed_datasets):
+    half = len(processed_datasets)//2
+    return processed_datasets[:half], processed_datasets[half:]
+
+X_data_pairs, Y_data_pairs = seperator(processed_datasets)
+
+def checker(final_X_datasets, final_Y_datasets):
+    for X_train_test_pairs in final_X_datasets:
+        X_len = len(X_train_test_pairs)
+        return X_len
+
+    for Y_train_test_pairs in final_X_datasets:
+        Y_len = len(Y_train_test_pairs)
+        return Y_len
+
+    if X_len == Y_len:
+        print("Dataset size and format confirmed and matched; Proceed")
+
+    else:
+        print("Dataset size and format failed and denied; Revise")
+
+checker(X_data_pairs, Y_data_pairs)
+
+for thing in processed_datasets:
+    print(len(thing)) # print "2" 6 times
+    for ting in thing:
+        print(len(ting)) # prints 70% and 30% of the dataset 6 times
 
 # X_data_train, X_data_test = splitter(algorithms, X_dataset)
 # Y_data_train, Y_data_test = splitter(algorithms, Y_dataset)
