@@ -1,5 +1,7 @@
 # TODO: Finish building the models
 #       Figure out how to distribute the datasets (potentially using .pop or making some sort of stack)
+#       Figure out why checker function isn't working
+#       Build function that pops the stack and distributes the dataset to each selected algorithm
 
 import csv
 import pandas as pd
